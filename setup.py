@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 version = '0.0.1'
 description = 'Merge individual pages of PDF file into one page'
@@ -6,14 +6,14 @@ description = 'Merge individual pages of PDF file into one page'
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-name = 'pdf_merger'
+name = 'pdf-merge'
 author = 'sifat (shhossain)'
 email = '<hossain@gmail.com>'
 
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 
-keywords = ['pdf-merger', 'pdf',]
+keywords = ['pdf-merger', 'pdf']
 
 classifiers = [
     'Development Status :: 3 - Alpha',
@@ -47,7 +47,7 @@ setup(
     author_email=email,
     url=projects_links["Source"],
     project_urls=projects_links,
-    packages=['pdfmerge'],
+    packages=find_packages(),
     install_requires=required,
     keywords=keywords,
     classifiers=classifiers,
