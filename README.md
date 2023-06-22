@@ -1,4 +1,4 @@
-# PDFMerger
+# PDFMerge
 
 Merge individual pages of PDF file into one page
 
