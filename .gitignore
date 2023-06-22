@@ -114,6 +114,7 @@ __pypackages__/
 
 /.vscode
 
+
 # Celery stuff
 celerybeat-schedule
 celerybeat.pid

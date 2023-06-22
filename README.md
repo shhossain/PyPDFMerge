@@ -1,4 +1,4 @@
-# PDFMerger
+# PyPDFMerge
 
 Merge individual pages of PDF file into one page
 
@@ -8,22 +8,22 @@ Merge individual pages of PDF file into one page
 
 | Before | After |
 |---------|---------|
-| ![Image 1](image.png) | ![Image 2](image-1.png) |
+| ![Image 1](https://raw.githubusercontent.com/shhossain/PyPDFMerge/main/image.png) | ![Image 2](https://github.com/shhossain/PyPDFMerge/raw/main/image-1.png) |
 
 
 ## Installation
 
 ```bash
-pip install pdf-merger
+pip install PyPDFMerge
 ```
 
-**NOTE**: You need visual studio build tools for C++ to install `pdfmerger` package. Refer to [this](https://pymupdf.readthedocs.io/en/latest/installation.html#installation-when-a-suitable-wheel-is-not-available) for more information.
+**NOTE**: You need visual studio build tools for C++ to install `PyPDFMerge` package. Refer to [this](https://pymupdf.readthedocs.io/en/latest/installation.html#installation-when-a-suitable-wheel-is-not-available) for more information.
 
 ## Usage
 
 ### Command Line
 
-You can use `pdfmerger` command to merge pdf files. It has following options:
+You can use `PyPDFMerge` command to merge pdf files. It has following options:
 
 ```bash
 pdfmerger <path> [-o <output>] [-g <group_size>] [-q <quality>]
@@ -32,7 +32,7 @@ pdfmerger <path> [-o <output>] [-g <group_size>] [-q <quality>]
 Example:
 
 ```bash
-pdfmerger ./test.pdf
+pdfmerger test.pdf
 ```
 
 This will merge `test.pdf` file and save it as `output.pdf` in the same directory.
@@ -41,7 +41,7 @@ This will merge `test.pdf` file and save it as `output.pdf` in the same director
 
 ### Python
 
-You can also use `pdfmerger` package in your python code. It has following options:
+You can also use `PyPDFMerge` package in your python code. It has following options:
 
 ```python
 from pdfmerger import PDFMerge

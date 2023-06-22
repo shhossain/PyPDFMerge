@@ -1,14 +1,14 @@
 from setuptools import find_packages, setup
 
-version = '0.0.1'
-description = 'Merge individual pages of PDF file into one page'
+name = 'PyPDFMerge'
+version = '0.0.2'
+author = 'sifat (shhossain)'
+email = '<hossain@gmail.com>'
+short_description = 'Merge individual pages of PDF file into one page'
 
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-name = 'pdf-merger'
-author = 'sifat (shhossain)'
-email = '<hossain@gmail.com>'
 
 with open('requirements.txt') as f:
     required = f.read().splitlines()
@@ -40,7 +40,7 @@ projects_links = {
 setup(
     name=name,
     version=version,
-    description=description,
+    description=short_description,
     long_description=long_description,
     long_description_content_type='text/markdown',
     author=author,
