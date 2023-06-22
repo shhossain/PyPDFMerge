@@ -1,6 +1,6 @@
 # PyPDFMerge
 
-Merge individual pages of PDF file into one page
+Merge individual pages of PDF files into one page
 
 ## Demo
 
@@ -23,7 +23,7 @@ pip install PyPDFMerge
 
 ### Command Line
 
-You can use `PyPDFMerge` command to merge pdf files. It has following options:
+You can use the `PyPDFMerge` command to merge pdf files. It has the following options:
 
 ```bash
 pdfmerger <path> [-o <output>] [-g <group_size>] [-q <quality>]
@@ -35,13 +35,13 @@ Example:
 pdfmerger test.pdf
 ```
 
-This will merge `test.pdf` file and save it as `output.pdf` in the same directory.
+This will merge the `test.pdf` file and save it as `output.pdf` in the same directory.
 
-**NOTE**: Output defaults to `output.pdf`, group size defaults to `2` and quality defaults to `1.5`.
+**NOTE**: Output defaults to `output.pdf`, group size defaults to `2`, and quality defaults to `1.5`.
 
 ### Python
 
-You can also use `PyPDFMerge` package in your python code. It has following options:
+You can also use the `PyPDFMerge` package in your Python code. It has the following options:
 
 ```python
 from pdfmerger import PDFMerge
