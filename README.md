@@ -6,7 +6,7 @@ Merge individual pages of PDF file into one page
 
 ### Merging 2 pages into 1
 
-| Image 1 | Image 2 |
+| Before | After |
 |---------|---------|
 | ![Image 1](image.png) | ![Image 2](image-1.png) |
 
