@@ -6,7 +6,7 @@ description = 'Merge individual pages of PDF file into one page'
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-name = 'pdf-merge'
+name = 'pdfmerge'
 author = 'sifat (shhossain)'
 email = '<hossain@gmail.com>'
 
