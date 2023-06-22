@@ -6,7 +6,7 @@ description = 'Merge individual pages of PDF file into one page'
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-name = 'pdfmerge'
+name = 'pdf-merger'
 author = 'sifat (shhossain)'
 email = '<hossain@gmail.com>'
 
@@ -54,7 +54,7 @@ setup(
     python_requires='>=3.6',
     entry_points={
         "console_scripts": [
-            "pdfmerge = pdfmerge.main:main",
+            "pdfmerger = pdfmerger.main:main",
         ],
     }
 )
