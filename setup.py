@@ -55,6 +55,7 @@ setup(
     entry_points={
         "console_scripts": [
             "pdfmerger = pdfmerger.main:main",
+            "pdfm = pdfmerger.main:main"
         ],
     }
 )

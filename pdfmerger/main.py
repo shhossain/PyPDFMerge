@@ -62,38 +62,12 @@ class PDFMerge:
 
         if n == 2:
             # Merge 2 images side by side
-            merged_image = Image.new("RGB", (2 * images[0].width, images[0].height))
+            width, height = sum(i.width for i in images), max(i.height for i in images)            
+            merged_image = Image.new("RGB", (width, height))
             merged_image.paste(images[0], (0, 0))
             merged_image.paste(images[1], (images[0].width, 0))
         elif n == 3:
-            # Merge 2 images side by side and 1 image below
-            merged_width = 2 * images[0].width
-            merged_height = 2 * images[0].height
-            merged_image = Image.new(
-                "RGB", (merged_width, merged_height), color="white"
-            )
-
-            # Paste the images into the merged image, preserving the original aspect ratio
-            first_image = images[0]
-            second_image = images[1]
-            third_image = images[2]
-
-            # Calculate the width and height for the side-by-side images
-            side_by_side_width = merged_width // 2
-            side_by_side_height = merged_height - first_image.height
-
-            # Resize the side-by-side images while maintaining aspect ratio
-            resized_first_image = first_image.resize(
-                (side_by_side_width, side_by_side_height)
-            )
-            resized_second_image = second_image.resize(
-                (side_by_side_width, side_by_side_height)
-            )
-
-            # Paste the resized images into the merged image
-            merged_image.paste(resized_first_image, (0, 0))
-            merged_image.paste(resized_second_image, (side_by_side_width, 0))
-            merged_image.paste(third_image, (0, side_by_side_height))
+            raise NotImplementedError("Group size 3 is not supported.")
         else:
             # Calculate the number of rows and columns based on the specified layout
             num_cols = 2
