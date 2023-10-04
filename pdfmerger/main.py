@@ -94,7 +94,9 @@ class PDFMerge:
 
         t = self.format_time(time.time() - s)
         if self.debug:
-            print(f"Saved {self.output_path}({self.page_count-self.after_page_count} pages) in {t}")
+            print(
+                f"Saved {self.output_path}({self.page_count-self.after_page_count} pages) in {t}"
+            )
 
         return path
 
@@ -136,12 +138,12 @@ class PDFMerge:
 
     def add_page_number(self, img, page_no) -> PILImage:
         draw = ImageDraw.Draw(img)
-        font = ImageFont.truetype("arial.ttf", self.dpi // 5)
+        font = ImageFont.truetype("arial.ttf", self.dpi // 10)
         pos = (20, 20)
         if self.pnp == "top-left":
             pos = (20, 20)
         elif self.pnp == "top-right":
-            pos = (img.width - 20, 20)
+            pos = (img.width - 40, 40)
         elif self.pnp == "bottom-left":
             pos = (20, img.height - 40)
         elif self.pnp == "bottom-right":
@@ -150,16 +152,16 @@ class PDFMerge:
             pos = (img.width // 2, 20)
         elif self.pnp == "bottom-center":
             pos = (img.width // 2, img.height - 40)
-            
+
         imgc = img.copy().convert("RGB").resize((100, 100))
         data = imgc.getdata()
         imgc.close()
         imgc = None
         avg = sum([sum(d) for d in data]) / len(data)
         data = None
-        color = (255,255,255)
+        color = (255, 255, 255)
         if avg > 127.5:
-            color = (0,0,0)
+            color = (0, 0, 0)
         draw.text(pos, str(page_no), color, font=font)
         return img
 
@@ -203,7 +205,7 @@ class PDFMerge:
         if len(imgs) == 1:
             self.cp(self.pdf_path, self.output_path)
             return self.output_path
-        
+
         if self.page_number:
             imgs = [self.add_page_number(img, i + 1) for i, img in enumerate(imgs)]
 
@@ -224,7 +226,6 @@ class PDFMerge:
                 img.close()
             merged_imgs = mg
             mg = None
-
 
         self.after_page_count = len(merged_imgs)
 
@@ -268,7 +269,21 @@ def count_pages_in_dir(watch_dir: str, group_size: int = 2):
     return total
 
 
+def yes_no_parser(s) -> bool:
+    if isinstance(s, bool):
+        return s
+    elif isinstance(s, int):
+        return bool(s)
+    elif isinstance(s, str):
+        s = s.lower()
+        if s == "yes" or s == "y" or s == "1":
+            return True
+    return False
+
+
 def main():
+    yes_no_choices = ["yes", "no", "0", "1", "y", "n"]
+
     parser = argparse.ArgumentParser(
         description="Merge PDF files by stitching pages together"
     )
@@ -280,10 +295,12 @@ def main():
     parser.add_argument(
         "-b",
         "--blank",
-        action="store_true",
+        type=str,
         help="ignore blank pages in pdf",
         default=True,
+        choices=yes_no_choices,
     )
+
     parser.add_argument(
         "-bpc",
         "--blank-page-color",
@@ -294,9 +311,10 @@ def main():
     parser.add_argument(
         "-p",
         "--page-number",
-        action="store_true",
+        type=str,
         help="add page number to the output pdf",
         default=True,
+        choices=yes_no_choices,
     )
     parser.add_argument(
         "-pn",
@@ -359,8 +377,8 @@ def main():
         group_size=args.group_size,
         quality=args.quality,
         output_file=args.output,
-        page_number=args.page_number,
-        ignore_blank=args.blank,
+        page_number=yes_no_parser(args.page_number),
+        ignore_blank=yes_no_parser(args.blank),
         background_color=args.blank_page_color,
         compression_quality=args.compression_quality,
         page_number_position=args.page_number_position,

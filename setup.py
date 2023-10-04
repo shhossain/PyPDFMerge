@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 name = 'PyPDFMerge'
-version = '0.0.4'
+version = '0.0.5'
 author = 'sifat (shhossain)'
 email = '<hossain@gmail.com>'
 short_description = 'Merge individual pages of PDF file into one page'
@@ -13,7 +13,7 @@ with open('README.md', encoding='utf-8') as f:
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 
-keywords = ['pdf-merger', 'pdf']
+keywords = ['pdf-merger', 'pdf', ]
 
 classifiers = [
     'Development Status :: 3 - Alpha',
