@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 name = 'PyPDFMerge'
-version = '0.0.3'
+version = '0.0.4'
 author = 'sifat (shhossain)'
 email = '<hossain@gmail.com>'
 short_description = 'Merge individual pages of PDF file into one page'

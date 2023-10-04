@@ -8,28 +8,72 @@ import time
 from PIL.Image import Image as PILImage
 import sys
 from glob import glob
+from pathlib import Path
+from typing import Literal
+import io
 
 
 class PDFMerge:
-    def __init__(self, pdf_file, output_file=None, group_size=2, quality=1.5,page_number=True,debug=True):
-        """ Merge PDF pages
-        
+    def __init__(
+        self,
+        pdf_file,
+        output_file=None,
+        group_size=2,
+        quality=1.5,
+        page_number=True,
+        page_number_position: Literal[
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+            "top-center",
+            "bottom-center",
+        ] = "top-right",
+        ignore_blank=True,
+        background_color=(255, 255, 255),
+        compression_quality=100,
+        debug=True,
+    ):
+        """Merge PDF pages
+
         Args:
             pdf_file (str): Path to the PDF file.
             output_file (str, optional): Path to the output PDF file. Defaults to "output.pdf".
             group_size (int, optional): Number of pages to merge. Defaults to 2.
             quality (float, optional): Quality of the output PDF. Defaults to 1.5.
             page_number (bool, optional): Whether to add page number to the output PDF. Defaults to True.
+            ignore_blank (bool, optional): Whether to ignore blank pages. Defaults to True.
+            black_page_color (tuple, optional): Color of the blank page. Defaults to (255,255,255).
             debug (bool, optional): Whether to print debug messages. Defaults to True.
         """
-        
+
+        if not os.path.exists(pdf_file):
+            raise FileNotFoundError(f"File `{pdf_file}` not found.")
+
+        output_file_name = str(Path(pdf_file).stem) + f"_merged_{group_size}.pdf"
+
         if output_file is None:
-            output_file = "output.pdf"
+            output_file = output_file_name
+        else:
+            f = Path(output_file)
+            if f.is_dir():
+                output_file = f / output_file_name
+            else:
+                if not f.suffix == ".pdf":
+                    output_file = f.parent / (f.stem + ".pdf")
+                else:
+                    output_file = f
+            output_file = str(output_file)
+            f = None
 
         self.pdf_path = pdf_file
         self.output_path = output_file
         self.debug = debug
         self.page_number = page_number
+        self.ignore_blank = ignore_blank
+        self.background_color = background_color
+        self.pnp = page_number_position
+        self.compression_quality = compression_quality
 
         self.group_size = group_size
         self.dpi = int(quality * 100)
@@ -50,7 +94,7 @@ class PDFMerge:
 
         t = self.format_time(time.time() - s)
         if self.debug:
-            print(f"Saved {self.page_count-self.after_page_count} pages in {t}")
+            print(f"Saved {self.output_path}({self.page_count-self.after_page_count} pages) in {t}")
 
         return path
 
@@ -62,7 +106,7 @@ class PDFMerge:
 
         if n == 2:
             # Merge 2 images side by side
-            width, height = sum(i.width for i in images), max(i.height for i in images)            
+            width, height = sum(i.width for i in images), max(i.height for i in images)
             merged_image = Image.new("RGB", (width, height))
             merged_image.paste(images[0], (0, 0))
             merged_image.paste(images[1], (images[0].width, 0))
@@ -92,8 +136,31 @@ class PDFMerge:
 
     def add_page_number(self, img, page_no) -> PILImage:
         draw = ImageDraw.Draw(img)
-        font = ImageFont.truetype("arial.ttf", self.dpi // 10)
-        draw.text((20, 20), str(page_no), (0, 0, 0), font=font)
+        font = ImageFont.truetype("arial.ttf", self.dpi // 5)
+        pos = (20, 20)
+        if self.pnp == "top-left":
+            pos = (20, 20)
+        elif self.pnp == "top-right":
+            pos = (img.width - 20, 20)
+        elif self.pnp == "bottom-left":
+            pos = (20, img.height - 40)
+        elif self.pnp == "bottom-right":
+            pos = (img.width - 40, img.height - 40)
+        elif self.pnp == "top-center":
+            pos = (img.width // 2, 20)
+        elif self.pnp == "bottom-center":
+            pos = (img.width // 2, img.height - 40)
+            
+        imgc = img.copy().convert("RGB").resize((100, 100))
+        data = imgc.getdata()
+        imgc.close()
+        imgc = None
+        avg = sum([sum(d) for d in data]) / len(data)
+        data = None
+        color = (255,255,255)
+        if avg > 127.5:
+            color = (0,0,0)
+        draw.text(pos, str(page_no), color, font=font)
         return img
 
     def create_pdf(self, file_name, imgs: list[PILImage]) -> str:
@@ -113,7 +180,19 @@ class PDFMerge:
             page = doc.load_page(i)
             pix = page.get_pixmap(dpi=self.dpi)
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)  # type: ignore
-            imgs.append(img)
+            if self.ignore_blank:
+                imgc = img.copy().convert("RGB").resize((100, 100))
+                data = imgc.getdata()
+                if all([d == self.background_color for d in data]):
+                    continue
+                else:
+                    imgs.append(img)
+                imgc.close()
+                imgc = None
+                data = None
+            else:
+                imgs.append(img)
+
         return imgs
 
     def cp(self, src, dst):
@@ -124,14 +203,28 @@ class PDFMerge:
         if len(imgs) == 1:
             self.cp(self.pdf_path, self.output_path)
             return self.output_path
+        
         if self.page_number:
             imgs = [self.add_page_number(img, i + 1) for i, img in enumerate(imgs)]
 
         img_groups = self.create_groups(imgs, self.group_size)
+        imgs = None
 
         merged_imgs: list[PILImage] = []
         for img_group in img_groups:
             merged_imgs.append(self.merge(img_group))
+
+        if self.compression_quality < 100:
+            mg = []
+            for img in merged_imgs:
+                pc = io.BytesIO()
+                img = img.convert("RGB")
+                img.save(pc, "JPEG", quality=self.compression_quality)
+                mg.append(Image.open(pc))
+                img.close()
+            merged_imgs = mg
+            mg = None
+
 
         self.after_page_count = len(merged_imgs)
 
@@ -181,12 +274,57 @@ def main():
     )
     parser.add_argument("path", type=str, help="path to pdf file")
     parser.add_argument("-o", "--output", type=str, help="output file name")
-    parser.add_argument("-g", "--group-size", type=int, help="number of pages to merge")
-    parser.add_argument("-q", "--quality", type=int, help="quality of the output file")
-    parser.add_argument("-w", "--watch", type=str, help="watch directory for new files")
     parser.add_argument(
-        "-c", "--count", help="count pages in pdfs in directory"
+        "-g", "--group-size", type=int, help="number of pages to merge default=2"
     )
+    parser.add_argument(
+        "-b",
+        "--blank",
+        action="store_true",
+        help="ignore blank pages in pdf",
+        default=True,
+    )
+    parser.add_argument(
+        "-bpc",
+        "--blank-page-color",
+        type=str,
+        help="color of the blank page default=(255,255,255)",
+        default="(255,255,255)",
+    )
+    parser.add_argument(
+        "-p",
+        "--page-number",
+        action="store_true",
+        help="add page number to the output pdf",
+        default=True,
+    )
+    parser.add_argument(
+        "-pn",
+        "--page-number-position",
+        type=str,
+        help="position of the page number",
+        default="top-right",
+        choices=[
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+            "top-center",
+            "bottom-center",
+        ],
+    )
+    parser.add_argument(
+        "-q", "--quality", type=int, help="quality of the output file default=1.5"
+    )
+    parser.add_argument(
+        "-cq",
+        "--compression-quality",
+        type=int,
+        help="compression quality of the output file default=100",
+        default=100,
+    )
+    parser.add_argument("-w", "--watch", type=str, help="watch directory for new files")
+    parser.add_argument("-c", "--count", help="count pages in pdfs in directory")
 
     unsupplied_args = ["-w", "-c"]
     if len(sys.argv) > 1:
@@ -213,10 +351,22 @@ def main():
     if args.quality is None:
         args.quality = 1.5
 
-    pdf = PDFMerge(pdf_file=args.path, group_size=args.group_size, quality=args.quality)
+    if args.blank_page_color is not None:
+        args.blank_page_color = eval(args.blank_page_color)
+
+    pdf = PDFMerge(
+        pdf_file=args.path,
+        group_size=args.group_size,
+        quality=args.quality,
+        output_file=args.output,
+        page_number=args.page_number,
+        ignore_blank=args.blank,
+        background_color=args.blank_page_color,
+        compression_quality=args.compression_quality,
+        page_number_position=args.page_number_position,
+    )
     pdf.run()
 
-    
-    
+
 if __name__ == "__main__":
     main()
