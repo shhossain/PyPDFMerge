@@ -20,8 +20,7 @@ class PDFMerge:
         output_file=None,
         group_size=2,
         quality=1.5,
-        orientation: Literal["landscape", "portrait"] = "landscape",
-        num_columns=2,
+        page_per_row=2,
         page_number=True,
         page_number_position: Literal[
             "top-left",
@@ -76,8 +75,7 @@ class PDFMerge:
         self.background_color = background_color
         self.pnp = page_number_position
         self.compression_quality = compression_quality
-        self.orientation = orientation
-        self.num_columns = num_columns
+        self.num_columns = page_per_row
 
         self.group_size = group_size
         self.dpi = int(quality * 100)
@@ -109,18 +107,8 @@ class PDFMerge:
         if n == 1:
             return images[0]
         
-        # if n < 4:
-        #     width, height = max(i.width for i in images), sum(i.height for i in images)
-        #     merged_image = Image.new("RGB", (width, height))
-        #     for i, img in enumerate(images):
-        #         if self.orientation == "landscape":
-        #             merged_image.paste(img, (i * img.width, 0))
-        #         else:
-        #             merged_image.paste(img, (0, i * img.height))
-        # else:
-            # Calculate the number of rows and columns based on the specified layout
         num_cols = self.num_columns
-        num_rows = (n + 1) // num_cols
+        num_rows = n // num_cols
 
         # Create a new blank image to hold the merged result
         first_image = images[0]
@@ -183,12 +171,12 @@ class PDFMerge:
         imgs = []
         for i in range(self.page_count):
             page = doc.load_page(i)
-            pix = page.get_pixmap(dpi=self.dpi)
+            pix = page.get_pixmap(dpi=self.dpi) # type: ignore
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)  # type: ignore
             if self.ignore_blank:
                 imgc = img.copy().convert("RGB").resize((100, 100))
                 data = imgc.getdata()
-                if all([d == self.background_color for d in data]):
+                if all([d == self.background_color for d in data]): # type: ignore
                     continue
                 else:
                     imgs.append(img)
