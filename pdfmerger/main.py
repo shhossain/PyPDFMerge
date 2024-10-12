@@ -20,6 +20,8 @@ class PDFMerge:
         output_file=None,
         group_size=2,
         quality=1.5,
+        orientation: Literal["landscape", "portrait"] = "landscape",
+        num_columns=2,
         page_number=True,
         page_number_position: Literal[
             "top-left",
@@ -74,6 +76,8 @@ class PDFMerge:
         self.background_color = background_color
         self.pnp = page_number_position
         self.compression_quality = compression_quality
+        self.orientation = orientation
+        self.num_columns = num_columns
 
         self.group_size = group_size
         self.dpi = int(quality * 100)
@@ -101,23 +105,22 @@ class PDFMerge:
         return path
 
     def merge(self, images) -> PILImage:
-        # 2 = side by side, 3 = 2 side 1 down, 4 = 2 top 2 down, ...
         n = len(images)
         if n == 1:
             return images[0]
-
-        if n == 2:
-            # Merge 2 images side by side
-            width, height = sum(i.width for i in images), max(i.height for i in images)
+        
+        if n < 4:
+            width, height = max(i.width for i in images), sum(i.height for i in images)
             merged_image = Image.new("RGB", (width, height))
-            merged_image.paste(images[0], (0, 0))
-            merged_image.paste(images[1], (images[0].width, 0))
-        elif n == 3:
-            raise NotImplementedError("Group size 3 is not supported.")
+            for i, img in enumerate(images):
+                if self.orientation == "landscape":
+                    merged_image.paste(img, (i * img.width, 0))
+                else:
+                    merged_image.paste(img, (0, i * img.height))
         else:
             # Calculate the number of rows and columns based on the specified layout
-            num_cols = 2
-            num_rows = (n + 1) // 2
+            num_cols = self.num_columns
+            num_rows = (n + 1) // num_cols
 
             # Create a new blank image to hold the merged result
             first_image = images[0]
