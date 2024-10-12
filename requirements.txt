@@ -1,2 +1,2 @@
-pillow<=9.5.0
-pymupdf<=1.22.5
+pillow
+pymupdf
