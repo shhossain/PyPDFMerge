@@ -109,33 +109,33 @@ class PDFMerge:
         if n == 1:
             return images[0]
         
-        if n < 4:
-            width, height = max(i.width for i in images), sum(i.height for i in images)
-            merged_image = Image.new("RGB", (width, height))
-            for i, img in enumerate(images):
-                if self.orientation == "landscape":
-                    merged_image.paste(img, (i * img.width, 0))
-                else:
-                    merged_image.paste(img, (0, i * img.height))
-        else:
+        # if n < 4:
+        #     width, height = max(i.width for i in images), sum(i.height for i in images)
+        #     merged_image = Image.new("RGB", (width, height))
+        #     for i, img in enumerate(images):
+        #         if self.orientation == "landscape":
+        #             merged_image.paste(img, (i * img.width, 0))
+        #         else:
+        #             merged_image.paste(img, (0, i * img.height))
+        # else:
             # Calculate the number of rows and columns based on the specified layout
-            num_cols = self.num_columns
-            num_rows = (n + 1) // num_cols
+        num_cols = self.num_columns
+        num_rows = (n + 1) // num_cols
 
-            # Create a new blank image to hold the merged result
-            first_image = images[0]
-            merged_width = first_image.width * num_cols
-            merged_height = first_image.height * num_rows
-            merged_image = Image.new("RGB", (merged_width, merged_height))
+        # Create a new blank image to hold the merged result
+        first_image = images[0]
+        merged_width = first_image.width * num_cols
+        merged_height = first_image.height * num_rows
+        merged_image = Image.new("RGB", (merged_width, merged_height))
 
-            # Iterate through the images and paste them into the merged image
-            for i in range(n):
-                row = i // num_cols
-                col = i % num_cols
-                image = images[i]
-                merged_image.paste(
-                    image, (col * first_image.width, row * first_image.height)
-                )
+        # Iterate through the images and paste them into the merged image
+        for i in range(n):
+            row = i // num_cols
+            col = i % num_cols
+            image = images[i]
+            merged_image.paste(
+                image, (col * first_image.width, row * first_image.height)
+            )
 
         return merged_image
 
